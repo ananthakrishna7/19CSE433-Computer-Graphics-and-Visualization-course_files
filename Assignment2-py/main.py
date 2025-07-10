@@ -1,12 +1,14 @@
 import pygame as pg
 from OpenGL.GL import *
-from triangle import Triangle
+from line import Line, Point
 from OpenGL.GL.shaders import compileProgram, compileShader
+import pickle
 
+SCREEN=(640, 480)
 class App:
     def __init__(self):
         pg.init()
-        pg.display.set_mode((640, 480), pg.OPENGL | pg.DOUBLEBUF)
+        pg.display.set_mode(SCREEN, pg.OPENGL | pg.DOUBLEBUF)
         self.clock = pg.time.Clock()
 
         glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -14,7 +16,9 @@ class App:
 
         self.shader = self.createShader("shaders/vecShader.fs", "shaders/fragShader.fs")
         glUseProgram(self.shader)
-        self.mesh = Triangle()
+        self.mesh = Line()
+        self.mesh2 = Line()
+        self.mesh2.reflectx()
 
         self.mainloop()
 
@@ -49,6 +53,10 @@ class App:
             glBindVertexArray(self.mesh.vao)
             glDrawArrays(GL_POINTS, 0, self.mesh.vertex_count)
 
+            glBindVertexArray(0)
+            glBindVertexArray(self.mesh2.vao)
+            glDrawArrays(GL_POINTS, 0, self.mesh2.vertex_count)
+
             pg.display.flip() # swap buffers ig?
 
             self.clock.tick(60)
@@ -62,4 +70,12 @@ class App:
 
 
 if __name__ == "__main__":
+    x1 = int(input("Enter pt 1 x: "))
+    y1 = int(input("Enter pt 1 y: "))
+    x2 = int(input("Enter pt 2 x: "))
+    y2 = int(input("Enter pt 2 y: "))
+    p1 = Point(x1, y1)
+    p2 = Point(x2, y2)
+    with open('pt.tmp', 'wb') as f:
+        pickle.dump((p1, p2), f)
     myApp = App()
