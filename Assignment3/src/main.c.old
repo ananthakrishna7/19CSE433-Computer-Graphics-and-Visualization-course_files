@@ -1,0 +1,690 @@
+// #include <glad/glad.h>
+// #include <GLFW/glfw3.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <stdbool.h>
+// #define SCR_HEIGHT 600
+// #define SCR_WIDTH 800
+// #include <string.h>
+
+// void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+// void processInput(GLFWwindow *window);
+// // char * readShaderFile(char* filename);
+
+// const char *vertexShaderSource = "#version 330 core\n"
+//     "layout (location = 0) in vec2 aPos;\n"
+//     "void main()\n"
+//     "{\n"
+//     "   "
+//     "   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
+//     "}\0";
+// const char *fragmentShaderSource = "#version 330 core\n"
+//     "out vec4 FragColor;\n"
+//     "void main()\n"
+//     "{\n"
+//     "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+//     "}\n\0";
+
+// // float* vertices;
+// // int x1 = 5;
+// // int Y1 = 6;
+// // int x2 = 8;
+// // int y2 = 12;
+
+// // float vertices[] = {
+// //   -0.5f, -0.5f, 0.0f, // Point 1 (line 1)
+// //   0.5f,  -0.5f, 0.0f, // Point 2 (line 1)
+// //   -0.2f,  0.3f, 0.0f, // Point 1 (line 2)
+// //   0.7f,  0.3f, 0.0f  // Point 2 (line 2)
+// // };
+
+// typedef struct{
+//   int x;
+//   int y;
+// } coordinates;
+
+// void * bressenham(coordinates p1, coordinates p2)
+// {
+//   int dy = p2.y - p1.y;
+//   int dx = p2.x = p1.x;
+//   int count = 1;
+//   float verts[256];
+//   verts[0] = (float)p1.x;
+//   verts[1] = (float)p1.y;
+//   verts[2] = 0.0f;
+//   int p = 2*dy - dx;
+//   int x1 = p1.x<p2.x?p1.x:p2.x;
+//   int y1 = p1.x<p2.x?p1.y:p2.y;
+//   int x2 = p1.x<p2.x?p2.x:p1.x;
+//   int y2 = p1.x<p2.x?p2.y:p1.y; // always ltr drawing
+//   int x = x1;
+//   int y = x2;
+//   bool pos = y2 > y1?true:false;
+//   while (x <= x2) // only works for 1st quadrant, ltr, dtu
+//   {
+//     if (p < 0)
+//     {
+//       x++;
+//       int ind = count * 3;
+//       verts[ind] = (float)x;
+//       verts[ind + 1] = (float)y;
+//       verts[ind + 2] = 0.0f;
+//       p += 2*dy;
+//     }
+//     else{
+//       x++;
+//       y = pos?y + 1:y - 1;
+//       p += 2*dy - 2*dx;
+//       int ind = count * 3;
+//       verts[ind] = (float)x;
+//       verts[ind + 1] = (float)y;
+//       verts[ind + 2] = 0.0f;
+//     }
+//     count++;
+//   }
+//   float final[count*3];
+//   for (int i = 0; i < count; i++)
+//   {
+//     final[i*3] = verts[i*3];
+//     final[i*3 + 1] = verts[i*3 + 1];
+//     final[i*3 + 2] = verts[i*3 + 2];
+//   }
+//   void* result = malloc(sizeof(final) + sizeof(int));
+//   memcpy(result, &count, sizeof(int));
+//   memcpy(result + sizeof(int), final, sizeof(final));
+//   return result;
+// }
+
+// int main(void) {
+//   GLFWwindow* window;
+
+//   // init glfw
+//   if (!glfwInit())
+//     return -1;
+
+//   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+//   // create window
+//   window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Hello from Assignment 2", NULL, NULL); // arg 4 is monitor number for fullscreen mode, NULL for windowed mode
+//   if (!window)
+//   {
+//     glfwTerminate();
+//     return -1;
+//   }
+
+//   // make window context current context
+//   glfwMakeContextCurrent(window);
+
+//   // check glad
+//   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+//   {
+//     fprintf(stderr, "Failed to initialize GLAD\n");
+//     return -1;
+//   }
+
+//   // set viewport for drawing
+//   glViewport(0, 0, 800, 600);
+
+//   // set framebuffer resize callback
+//   // this will be called whenever the window is resized
+//   // it sets the viewport to the new width and height of the window
+//   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+//   int n = 4;
+//   coordinates p1, p2;
+//   p1.x = 0;
+//   p1.y = 0;
+//   p2.x = 5;
+//   p2.y = 5;
+//   // bressenham()
+//   // vertex shader
+//   unsigned int vertexShader;
+//   vertexShader = glCreateShader(GL_VERTEX_SHADER);
+//   glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+//   glCompileShader(vertexShader);
+
+//   // check compile success
+//   int success;
+//   char infoLog[512];
+//   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+//   if (!success)
+//   {
+//     glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+//     printf("ERROR::VERTEX SHADER NOT COMPILED. INFO LOG:\n%s", infoLog);
+//   }
+
+//   // fragment shader
+//   unsigned int fragmentShader;
+//   fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+//   glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+//   glCompileShader(fragmentShader);
+
+//   // check compile success
+//   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+//   if (!success)
+//   {
+//     glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+//     printf("ERROR::FRAGMENT SHADER NOT COMPILED. INFO LOG:\n%s", infoLog);
+//   }
+
+//   // shader program
+//   GLuint shaderProgram;
+//   shaderProgram = glCreateProgram();
+//   // attach and link
+//   glAttachShader(shaderProgram, vertexShader);
+//   glAttachShader(shaderProgram, fragmentShader);
+//   glLinkProgram(shaderProgram);
+//   // check for errors
+//   glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+//   if(!success) {
+//     glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+//     printf("ERROR::SHADER PROGRAM NOT LINKED. INFO LOG:\n%s", infoLog);
+//   }
+  
+//   // clean up
+//   glDeleteShader(vertexShader);
+//   glDeleteShader(fragmentShader);
+
+//   GLuint VBO, VAO; // vertex buffer object, vertex array object
+//   glGenBuffers(1, &VBO); // holds vertex data
+//   glGenVertexArrays(1, &VAO); // holds vertex config
+
+//   glBindVertexArray(VAO); // bind the VAO, all subsequent calls will affect this VAO
+
+//   glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+//   // tell opengl what is there in the vertex data, GL_FALSE -> GL_TRUE for int data
+//   glVertexAttribPointer(0, 2, GL_INT, GL_TRUE, 2 * sizeof(int), (void*) 0); // arg 1 corresponds to the layout(location = 0) in the vertex shader -> position attribute
+//   glEnableVertexAttribArray(0);
+//   glBindVertexArray(0); // unbind. unneccesary here, but it seems like a good practice
+  
+//   // main loop
+//   while (!glfwWindowShouldClose(window))
+//   {
+//     // process input
+//     processInput(window);
+
+//     // rendering code
+
+//     // FIRST clear the screen
+//     glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // bluish green color
+//     glClear(GL_COLOR_BUFFER_BIT);
+
+//     // draw stuff here
+//     glUseProgram(shaderProgram); // we will use this shader program hereafter
+//     glBindVertexArray(VAO); // bind vertex array that holds the configurations
+//     glDrawArrays(GL_LINES, 0, n);
+
+//     // swap buffers
+//     glfwSwapBuffers(window);
+//     glfwPollEvents(); // poll for events
+//   }
+
+//   // cleanup
+//   glDeleteVertexArrays(1, &VAO);
+//   glDeleteBuffers(1, &VBO);
+//   glDeleteProgram(shaderProgram);
+//   // free(vertices);
+
+//   glfwTerminate();
+//   return 0;
+// }
+
+// void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+// {
+//     glViewport(0, 0, width, height);
+// } 
+
+// void processInput(GLFWwindow *window)
+// {
+//     if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+//         glfwSetWindowShouldClose(window, true);
+// }
+
+/*CHATGPT GEN 1*/
+// #include <glad/glad.h>
+// #include <GLFW/glfw3.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <math.h>
+
+// // Shader Sources
+// const char* vertexShaderSource = "#version 330 core\n"
+//     "layout (location = 0) in vec2 aPos;\n"
+//     "void main() {\n"
+//     "   gl_PointSize = 5.0;\n"
+//     "   gl_Position = vec4(aPos, 0.0, 1.0);\n"
+//     "}\n";
+
+// const char* fragmentShaderSource = "#version 330 core\n"
+//     "out vec4 FragColor;\n"
+//     "void main() {\n"
+//     "   FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+//     "}\n";
+
+// // Converts screen-space integer coordinates to NDC [-1, 1]
+// void screenToNDC(int x, int y, float* fx, float* fy, int width, int height) {
+//     *fx = (2.0f * x) / width - 1.0f;
+//     *fy = 1.0f - (2.0f * y) / height;
+// }
+
+// // Generates vertices using Bresenham's Algorithm
+// int generateLinePoints(float* points, int x0, int y0, int x1, int y1, int width, int height) {
+//     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+//     int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+//     int err = dx + dy, e2;
+//     int count = 0;
+
+//     while (1) {
+//         float fx, fy;
+//         screenToNDC(x0, y0, &fx, &fy, width, height);
+//         points[2 * count] = fx;
+//         points[2 * count + 1] = fy;
+//         count++;
+
+//         if (x0 == x1 && y0 == y1) break;
+//         e2 = 2 * err;
+//         if (e2 >= dy) { err += dy; x0 += sx; }
+//         if (e2 <= dx) { err += dx; y0 += sy; }
+//     }
+//     return count;
+// }
+
+// // Shader Compilation Helper
+// GLuint compileShader(GLenum type, const char* source) {
+//     GLuint shader = glCreateShader(type);
+//     glShaderSource(shader, 1, &source, NULL);
+//     glCompileShader(shader);
+//     int success;
+//     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+//     if (!success) {
+//         char infoLog[512];
+//         glGetShaderInfoLog(shader, 512, NULL, infoLog);
+//         fprintf(stderr, "Shader Compilation Error: %s\n", infoLog);
+//         exit(EXIT_FAILURE);
+//     }
+//     return shader;
+// }
+
+// int main() {
+//     if (!glfwInit()) {
+//         fprintf(stderr, "Failed to initialize GLFW\n");
+//         return -1;
+//     }
+
+//     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+//     const int screenWidth = 800, screenHeight = 600;
+//     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "Bresenham Line", NULL, NULL);
+//     if (!window) {
+//         fprintf(stderr, "Failed to create window\n");
+//         glfwTerminate();
+//         return -1;
+//     }
+
+//     glfwMakeContextCurrent(window);
+//     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+//         fprintf(stderr, "Failed to initialize GLAD\n");
+//         return -1;
+//     }
+
+//     // Compile and link shaders
+//     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+//     GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+//     GLuint shaderProgram = glCreateProgram();
+//     glAttachShader(shaderProgram, vertexShader);
+//     glAttachShader(shaderProgram, fragmentShader);
+//     glLinkProgram(shaderProgram);
+
+//     // Check link status
+//     int success;
+//     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+//     if (!success) {
+//         char log[512];
+//         glGetProgramInfoLog(shaderProgram, 512, NULL, log);
+//         fprintf(stderr, "Shader Program Linking Error: %s\n", log);
+//         return -1;
+//     }
+
+//     glDeleteShader(vertexShader);
+//     glDeleteShader(fragmentShader);
+
+//     // Compute Bresenham Points
+//     float lineVertices[10000]; // up to 5000 points (2 floats per point)
+//     int numPoints = generateLinePoints(lineVertices, 10, 10, 70, 50, screenWidth, screenHeight);
+
+//     GLuint VBO, VAO;
+//     glGenVertexArrays(1, &VAO);
+//     glGenBuffers(1, &VBO);
+//     glBindVertexArray(VAO);
+
+//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//     glBufferData(GL_ARRAY_BUFFER, numPoints * 2 * sizeof(float), lineVertices, GL_STATIC_DRAW);
+
+//     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+//     glEnableVertexAttribArray(0);
+
+//     glUseProgram(shaderProgram);
+//     glBindVertexArray(VAO);
+
+//     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//     while (!glfwWindowShouldClose(window)) {
+//         glClear(GL_COLOR_BUFFER_BIT);
+
+//         glDrawArrays(GL_POINTS, 0, numPoints);
+
+//         glfwSwapBuffers(window);
+//         glfwPollEvents();
+//     }
+
+//     glDeleteVertexArrays(1, &VAO);
+//     glDeleteBuffers(1, &VBO);
+//     glfwTerminate();
+//     return 0;
+// }
+
+
+/*CHATGPT VER2 */
+// #include <glad/glad.h>
+// #include <GLFW/glfw3.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <math.h>
+
+// // Vertex Shader
+// const char* vertexShaderSource = "#version 330 core\n"
+//     "layout (location = 0) in vec2 aPos;\n"
+//     "void main() {\n"
+//     "   gl_PointSize = 5.0;\n"
+//     "   gl_Position = vec4(aPos, 0.0, 1.0);\n"
+//     "}\n";
+
+// // Fragment Shader
+// const char* fragmentShaderSource = "#version 330 core\n"
+//     "out vec4 FragColor;\n"
+//     "void main() {\n"
+//     "   FragColor = vec4(1.0, 0.4, 0.0, 1.0);\n"
+//     "}\n";
+
+// // Convert integer screen coordinates to NDC
+// void screenToNDC(int x, int y, float* fx, float* fy, int width, int height) {
+//     *fx = (2.0f * x) / width - 1.0f;
+//     *fy = 1.0f - (2.0f * y) / height;
+// }
+
+// // Bresenham with step visibility
+// int generateLinePoints(float* points, int x0, int y0, int x1, int y1, int width, int height, int stepInterval) {
+//     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+//     int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+//     int err = dx + dy, e2;
+//     int count = 0;
+//     int stepCount = 0;
+
+//     while (1) {
+//         if (stepCount % stepInterval == 0) {
+//             float fx, fy;
+//             screenToNDC(x0, y0, &fx, &fy, width, height);
+//             points[2 * count] = fx;
+//             points[2 * count + 1] = fy;
+//             count++;
+//         }
+
+//         if (x0 == x1 && y0 == y1) break;
+//         e2 = 2 * err;
+//         if (e2 >= dy) { err += dy; x0 += sx; }
+//         if (e2 <= dx) { err += dx; y0 += sy; }
+
+//         stepCount++;
+//     }
+//     return count;
+// }
+
+// // Shader Compilation
+// GLuint compileShader(GLenum type, const char* source) {
+//     GLuint shader = glCreateShader(type);
+//     glShaderSource(shader, 1, &source, NULL);
+//     glCompileShader(shader);
+//     int success;
+//     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+//     if (!success) {
+//         char info[512];
+//         glGetShaderInfoLog(shader, 512, NULL, info);
+//         fprintf(stderr, "Shader Error: %s\n", info);
+//         exit(EXIT_FAILURE);
+//     }
+//     return shader;
+// }
+
+// int main() {
+//     if (!glfwInit()) {
+//         fprintf(stderr, "Failed to init GLFW\n");
+//         return -1;
+//     }
+
+//     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+//     const int screenWidth = 800, screenHeight = 600;
+//     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "Bresenham Step Visualizer", NULL, NULL);
+//     if (!window) {
+//         fprintf(stderr, "Failed to create window\n");
+//         glfwTerminate();
+//         return -1;
+//     }
+//     glfwMakeContextCurrent(window);
+//     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+//         fprintf(stderr, "Failed to initialize GLAD\n");
+//         return -1;
+//     }
+
+//     // Compile Shaders
+//     GLuint vs = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+//     GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+//     GLuint shaderProgram = glCreateProgram();
+//     glAttachShader(shaderProgram, vs);
+//     glAttachShader(shaderProgram, fs);
+//     glLinkProgram(shaderProgram);
+//     glDeleteShader(vs);
+//     glDeleteShader(fs);
+
+//     int success;
+//     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+//     if (!success) {
+//         char log[512];
+//         glGetProgramInfoLog(shaderProgram, 512, NULL, log);
+//         fprintf(stderr, "Shader Link Error: %s\n", log);
+//         return -1;
+//     }
+
+//     // Line from (100,100) to (700,500) with step interval
+//     float vertices[10000];
+//     int stepInterval = 5; // Controls spacing between steps
+//     int numPoints = generateLinePoints(vertices, 100, 100, 700, 500, screenWidth, screenHeight, stepInterval);
+
+//     GLuint VAO, VBO;
+//     glGenVertexArrays(1, &VAO);
+//     glGenBuffers(1, &VBO);
+
+//     glBindVertexArray(VAO);
+//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//     glBufferData(GL_ARRAY_BUFFER, numPoints * 2 * sizeof(float), vertices, GL_STATIC_DRAW);
+
+//     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+//     glEnableVertexAttribArray(0);
+
+//     // Render Loop
+//     glUseProgram(shaderProgram);
+//     glBindVertexArray(VAO);
+//     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+//     glEnable(GL_PROGRAM_POINT_SIZE);
+
+
+//     while (!glfwWindowShouldClose(window)) {
+//         glClear(GL_COLOR_BUFFER_BIT);
+//         glDrawArrays(GL_POINTS, 0, numPoints);
+//         glfwSwapBuffers(window);
+//         glfwPollEvents();
+//     }
+
+//     // Cleanup
+//     glDeleteVertexArrays(1, &VAO);
+//     glDeleteBuffers(1, &VBO);
+//     glfwTerminate();
+//     return 0;
+// }
+
+/*CHATGPT VER3*/
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+// Shader sources
+const char* vertexShaderSource = "#version 330 core\n"
+    "layout (location = 0) in vec2 aPos;\n"
+    "void main() {\n"
+    "   gl_PointSize = 12.0;\n"
+    "   gl_Position = vec4(aPos, 0.0, 1.0);\n"
+    "}\n";
+
+const char* fragmentShaderSource = "#version 330 core\n"
+    "out vec4 FragColor;\n"
+    "void main() {\n"
+    "   FragColor = vec4(0.2, 1.0, 0.3, 1.0);\n"
+    "}\n";
+
+// Convert screen coords to NDC
+void screenToNDC(int x, int y, float* fx, float* fy, int width, int height) {
+    *fx = (2.0f * x) / width - 1.0f;
+    *fy = 1.0f - (2.0f * y) / height;
+}
+
+// Generalized Bresenham for all octants
+int generateLinePoints(float* points, int x0, int y0, int x1, int y1, int width, int height, int stepInterval) {
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+
+    int err = (dx > dy ? dx : -dy) / 2;
+    int e2;
+
+    int count = 0;
+    int step = 0;
+
+    while (1) {
+        if (step % stepInterval == 0) {
+            float fx, fy;
+            screenToNDC(x0, y0, &fx, &fy, width, height);
+            points[2 * count] = fx;
+            points[2 * count + 1] = fy;
+            count++;
+        }
+
+        if (x0 == x1 && y0 == y1) break;
+
+        e2 = err;
+        if (e2 > -dx) { err -= dy; x0 += sx; }
+        if (e2 < dy)  { err += dx; y0 += sy; }
+
+        step++;
+    }
+
+    return count;
+}
+
+// Shader compilation helper
+GLuint compileShader(GLenum type, const char* src) {
+    GLuint shader = glCreateShader(type);
+    glShaderSource(shader, 1, &src, NULL);
+    glCompileShader(shader);
+    int success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char log[512];
+        glGetShaderInfoLog(shader, 512, NULL, log);
+        fprintf(stderr, "Shader compile error: %s\n", log);
+        exit(EXIT_FAILURE);
+    }
+    return shader;
+}
+
+int main() {
+    if (!glfwInit()) return -1;
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    const int screenWidth = 800, screenHeight = 600;
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "Bresenham - All Octants", NULL, NULL);
+    if (!window) { glfwTerminate(); return -1; }
+
+    glfwMakeContextCurrent(window);
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+        fprintf(stderr, "Failed to load GLAD\n");
+        return -1;
+    }
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    // Shader setup
+    GLuint vs = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+    GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vs);
+    glAttachShader(shaderProgram, fs);
+    glLinkProgram(shaderProgram);
+    glDeleteShader(vs); glDeleteShader(fs);
+
+    // Generate Bresenham line in all octants (try various pairs)
+    float points1[10000];
+    float points2[10000];
+    float points3[10000];
+    float points4[10000];
+    int stepInterval = 5;
+
+    // Try a steep negative slope (2nd octant)
+    int numPoints = generateLinePoints(points1,
+        600, 100, 200, 500, screenWidth, screenHeight, stepInterval);
+
+    // Buffer setup
+    GLuint VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, numPoints * 2 * sizeof(float), points, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glUseProgram(shaderProgram);
+
+    // Main loop
+    while (!glfwWindowShouldClose(window)) {
+        glClearColor(0.07f, 0.07f, 0.07f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_POINTS, 0, numPoints);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+    glfwTerminate();
+    return 0;
+}
