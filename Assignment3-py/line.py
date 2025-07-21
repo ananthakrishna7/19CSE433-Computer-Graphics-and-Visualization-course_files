@@ -14,9 +14,9 @@ class Point:
 class Line:
     def __init__(self,):
 
-        with open('pt.tmp', 'rb') as f:
+        with open('ptl.tmp', 'rb') as f:
             self.p1, self.p2 = pickle.load(f)
-        self.vertices = np.array(self.dda(), np.float32)
+        self.vertices = np.array(self.bressenham(), np.float32)
         self.vertex_count = len(self.vertices)//2
         self.vao = glGenVertexArrays(1)
         glBindVertexArray(self.vao)
@@ -47,6 +47,42 @@ class Line:
         verts = self.screenToNDC(verts)
         return verts
 
+    def reflectx(self):
+        for i in range(len(self.vertices), 2):
+            self.vertices[i] = -self.vertices[i]
+    def bressenham(self):
+        x1 = self.p1.x
+        y1 = self.p1.y
+        x2 = self.p2.x
+        y2 = self.p2.y
+        if x1 > x2:
+            x1,x2 = x2,x1
+            y1,y2 = y2,y1
+        verts = [int(x1), int(y1)]
+        dx = x2 - x1
+        dy = y2 - y1 # neg
+        neg = False
+        if dy < 0:
+            neg = True
+            dy = -dy
+        p = 2*dy - dx # neg
+        x = x1
+        y = y1
+        while x <= x2:
+            if p < 0:
+                x += 1
+                p += 2*dy # neg
+            else:
+                x += 1
+                if not neg:
+                    y += 1
+                else:
+                    y -= 1
+                p += 2*dy - 2*dx
+            verts.extend([x, y])
+
+        verts = self.screenToNDC(verts)
+        return verts
     
     def screenToNDC(self, verts):
         # try screen. then try min max

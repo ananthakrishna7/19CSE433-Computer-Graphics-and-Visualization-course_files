@@ -1,6 +1,7 @@
 import pygame as pg
 from OpenGL.GL import *
 from line import Line, Point
+from circle import Circle
 from OpenGL.GL.shaders import compileProgram, compileShader
 import pickle
 
@@ -16,7 +17,7 @@ class App:
 
         self.shader = self.createShader("shaders/vecShader.fs", "shaders/fragShader.fs")
         glUseProgram(self.shader)
-        self.mesh = Line()
+        self.mesh = Circle()
 
         self.mainloop()
 
@@ -64,12 +65,9 @@ class App:
 
 
 if __name__ == "__main__":
-    x1 = int(input("Enter pt 1 x: "))
-    y1 = int(input("Enter pt 1 y: "))
-    x2 = int(input("Enter pt 2 x: "))
-    y2 = int(input("Enter pt 2 y: "))
-    p1 = Point(x1, y1)
-    p2 = Point(x2, y2)
-    with open('pt.tmp', 'wb') as f:
-        pickle.dump((p1, p2), f)
+    xc = int(input("Enter circle center x: "))
+    yc = int(input("Enter circle center y: "))
+    r = int(input("Enter circle radius: "))
+    with open('ptc.tmp', 'wb') as f:
+        pickle.dump((xc, yc, r), f)
     myApp = App()
